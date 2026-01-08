@@ -1,2 +1,7 @@
 # nexus-stack.ch
-Website for the Nexus Stack Project
+
+Official website for the [Nexus Stack](https://github.com/stefanko-ch/Nexus-Stack) project.
+
+## 🌐 Live Site
+
+**[nexus-stack.ch](https://nexus-stack.ch)**

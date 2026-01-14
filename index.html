@@ -257,11 +257,20 @@
         }
 
         .footer {
-            position: absolute;
-            bottom: 2rem;
+            margin-top: 3rem;
+            padding: 2rem 1rem;
             font-size: 0.75rem;
             color: #303540;
             letter-spacing: 0.1em;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        .footer .disclaimer {
+            color: #404550;
+            font-size: 0.6rem;
+            margin-top: 1rem;
+            line-height: 1.5;
         }
 
         .footer a {
@@ -305,10 +314,10 @@
         <span class="badge">⚡ Coming Soon</span>
     </div>
     <div class="footer">
-        &copy; 2025 Stefan Koch<br>
-        <small style="color: #404550; font-size: 0.65rem; margin-top: 0.5rem; display: block;">
-            Disclaimer: This is an independent open-source project released under the MIT License with no commercial intentions. "Nexus Stack" is not affiliated with, endorsed by, or connected to any other companies or products using similar names, including but not limited to Sonatype Nexus Repository, Nexus Mods, Google Nexus, Nexus (Blockchain), or any other trademark holders. All other trademarks are the property of their respective owners.
-        </small>
+        &copy; 2025 Stefan Koch
+        <p class="disclaimer">
+            Disclaimer: This is an independent open-source project released under the MIT License with no commercial intentions. "Nexus Stack" is not affiliated with Sonatype Nexus Repository, Nexus Mods, Google Nexus, Nexus (Blockchain), or any other trademark holders.
+        </p>
     </div>
 </body>
 </html>

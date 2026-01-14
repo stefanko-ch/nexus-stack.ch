@@ -1,0 +1,86 @@
+name: Update Website Content
+
+on:
+  repository_dispatch:
+    types: [nexus-stack-release]
+  workflow_dispatch:  # Manual trigger for testing
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    name: Update Website from Nexus-Stack
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout nexus-stack.ch
+        uses: actions/checkout@v4
+
+      - name: Fetch Nexus-Stack README
+        id: fetch
+        run: |
+          # Fetch the raw README from Nexus-Stack
+          curl -s "https://raw.githubusercontent.com/stefanko-ch/Nexus-Stack/main/README.md" -o /tmp/readme.md
+          
+          echo "✅ Fetched README.md from Nexus-Stack"
+
+      - name: Extract and update content
+        run: |
+          # Extract version from dispatch payload or fetch latest release
+          if [ -n "${{ github.event.client_payload.version }}" ]; then
+            VERSION="${{ github.event.client_payload.version }}"
+          else
+            VERSION=$(curl -s "https://api.github.com/repos/stefanko-ch/Nexus-Stack/releases/latest" | jq -r '.tag_name // "unknown"')
+          fi
+          
+          echo "Latest version: $VERSION"
+          
+          # Extract the "Available Stacks" table from README
+          STACKS=$(awk '/^## Available Stacks/,/^## [^A]/' /tmp/readme.md | grep -E '^\| \*\*' | head -20)
+          
+          echo "Extracted stacks:"
+          echo "$STACKS"
+          
+          # Extract "What This Does" section
+          FEATURES=$(awk '/^## What This Does/,/^## [^W]/' /tmp/readme.md | grep -E '^- ' | head -10)
+          
+          echo "Extracted features:"
+          echo "$FEATURES"
+          
+          # Create a JSON file with the extracted data for potential future use
+          cat > /tmp/nexus-data.json << EOF
+          {
+            "version": "$VERSION",
+            "updated_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "source": "https://github.com/stefanko-ch/Nexus-Stack"
+          }
+          EOF
+          
+          # Update the version badge in index.html if it exists
+          if grep -q "data-nexus-version" index.html 2>/dev/null; then
+            sed -i "s/data-nexus-version=\"[^\"]*\"/data-nexus-version=\"$VERSION\"/" index.html
+            echo "✅ Updated version badge"
+          fi
+          
+          # For now, we'll store the latest version info
+          echo "$VERSION" > .nexus-version
+          
+          echo "✅ Content extraction complete"
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Check if there are changes
+          if git diff --quiet && git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          
+          git add -A
+          git commit -m "chore: Update content from Nexus-Stack ${{ github.event.client_payload.version || 'latest' }}"
+          git push
+          
+          echo "✅ Changes committed and pushed"
